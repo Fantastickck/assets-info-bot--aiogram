@@ -14,6 +14,7 @@ from utils.charts_data import Chart
 from keyboards.inline.charts import charts_markup, chart_cb
 from keyboards.default.params_share import share_markup
 from keyboards.default.params_etf import etf_markup
+from keyboards.default.params_crypto import crypto_markup
 from keyboards.default.type_asset import type_asset_markup
 
 from messages.config import CMD_EMOJI, ASSET_EMOJI
@@ -44,7 +45,7 @@ async def chart_test(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         type_asset = data['type_asset']
         ticker_asset = data['ticker_asset']
-        if type_asset == 'share' or type_asset == 'etf' and ticker_asset != '':
+        if type_asset in ['share', 'etf', 'crypto'] and ticker_asset != '':
             keyboard = charts_markup(type_asset, ticker_asset)
             await message.answer(f'Выберите период графика по {ticker_asset}', reply_markup=keyboard)
         elif type_asset == '':
@@ -60,15 +61,17 @@ async def create_graph(query: types.CallbackQuery, callback_data: dict):
     type_asset = callback_data['type_asset']
     ticker_asset = callback_data['ticker_asset']
     period = callback_data['period']
-
     message_loading = await bot.send_message(chat_id=query.message.chat.id, text='Загрузка графика...')
-
     print(type_asset, ticker_asset, period)
     graph = Chart(type_asset, ticker_asset, period)
     path_to_graph = graph.create_chart()
     keyboard = charts_markup(type_asset, ticker_asset)
 
-    await bot.send_photo(chat_id=query.message.chat.id, caption=f'График за {TRANSLATE_PERIOD.get(period)} для {ticker_asset}', photo=types.InputFile(path_to_graph), reply_markup=keyboard)
+    await bot.send_photo(chat_id=query.message.chat.id,
+        caption=f'График за {TRANSLATE_PERIOD.get(period)} для {ticker_asset}', 
+        photo=types.InputFile(path_to_graph), 
+        reply_markup=keyboard
+    )
     await bot.delete_message(chat_id=query.message.chat.id, message_id=message_loading.message_id)
 
 
@@ -98,19 +101,23 @@ async def cmd_crypto(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text == CMD_EMOJI.get('last_price'))
 async def get_share_last_price(message: types.Message, state: FSMContext):
-    # keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    
+
     async with state.proxy() as data:
         ticker_asset = data['ticker_asset']
         type_asset = data['type_asset']
 
     if type_asset != '' and ticker_asset != '':
-        last_price = get_last_price(ticker_asset, type_asset)
         if type_asset == 'share':
             keyboard = share_markup()
+            last_price = get_last_price(ticker_asset, type_asset)
             last_price = last_price.quantize(Decimal('1.00'))
         elif type_asset == 'etf':
             keyboard = etf_markup()
+            last_price = get_last_price(ticker_asset, type_asset)
+            last_price = last_price.quantize(Decimal('1.0000'))
+        elif type_asset == 'crypto':
+            keyboard = crypto_markup()
+            last_price = get_last_price_crypto(ticker_asset)
             last_price = last_price.quantize(Decimal('1.0000'))
         await message.answer(
             fmt.text(
@@ -125,7 +132,6 @@ async def get_share_last_price(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text == ASSET_EMOJI.get('fundamentals'))
 async def get_share_fund_info(message: types.Message, state: FSMContext):
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard = share_markup()
     async with state.proxy() as data:
         if data['type_asset'] == 'share' and data['ticker_asset'] != '':
@@ -139,9 +145,7 @@ async def get_share_fund_info(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text == 'Состав фонда')
 async def get_fund_structure(message: types.Message):
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add('Последняя цена')
-    keyboard.add('Поиск нового инструмента')
+    keyboard = etf_markup()
     await message.answer('Функционал еще не готов', reply_markup=keyboard)
 
 
@@ -208,25 +212,21 @@ async def cmd_info_stock(message: types.Message, state: FSMContext):
                     parse_mode='HTML',
                     reply_markup=keyboard
                     )
-                # try:
-                #     last_price = get_last_price(ticker, type_asset)
-                # except:
-                #     await message.answer('Я не нашел тикер такого фонда(, попробуй еще раз')
-                # else:
-                #     await message.answer(f'Что бы ты хотел узнать о фонде {ticker.upper()} ?', reply_markup=keyboard)
             else:
                 await message.answer('Упс, неправильный формат тикера(. Попробуй еще раз')
             
         elif type_asset == 'crypto':
+            keyboard = crypto_markup()
             if message.text == CMD_EMOJI.get('general_info'):
                 ticker = data['ticker_asset']
             else:
                 ticker = message.text.upper()
+            data['ticker_asset'] = ticker
             try:
                 last_price = get_last_price_crypto(ticker)
             except:
                 await message.answer('Неправильный тикер. Попробуй например: "BTCUSDT"')
             else:
-                await message.answer(f'{ticker}: {last_price}')
+                await message.answer(f'Соотношение: {ticker}', reply_markup=keyboard)
         else:
             await message.answer('Выбери тип инструмента')

@@ -5,6 +5,7 @@ from typing import Dict, List
 from dateutil.relativedelta import relativedelta
 
 from tinkoff.invest import Client
+from binance.spot import Spot 
 from .market_data import API_TOKEN, get_figi_by_search
 
 from tinkoff.invest.schemas import CandleInterval
@@ -52,32 +53,34 @@ def get_candles_stock_etf(figi, period):
     }
 
 
-# def create_path_to_graph(ticker, period):
-#     date_today = datetime.today().strftime('%d-%m-%Y')
-#     path = os.path.join('charts', period, date_today)
-#     file_name = f'{ticker}.png'
-#     result_path = os.path.join(path, file_name)
-#     if os.path.isdir(path):
-#         return result_path
-#     else:
-#         os.mkdir(path)
-#     return result_path
-
-
-# def create_graph_plotly(data):
-#     fig = go.Figure(data=[go.Candlestick(x=data['date_data'],
-#     open=data['open_data'], high=data['high_data'], low=data['low_data'], close=data['close_data'])])
-#     fig.write_image()
-#     return fig
-
-
-# def get_path_to_graph(ticker, type_asset, period):
-#     figi = get_figi_by_search(ticker, type_asset)
-#     data = get_candles_stock_etf(figi)
-#     result_path = create_path_to_graph(ticker, period)
-#     fig = create_graph_plotly(data)
-#     fig.write_image(result_path, width=1000)
-#     return result_path
+def get_candles_crypto(ticker, period):
+    date_to = int(datetime.today().timestamp() * 1000)
+    date_from = int(PERIOD_DATE.get(period).timestamp()*1000)
+    spot_client = Spot(base_url="https://api.binance.com")
+    candles = spot_client.klines(ticker, '1d', startTime=date_from, endTime=date_to)
+    date_data = []
+    open_data = []
+    close_data = []
+    high_data = []
+    low_data = []
+    for candle in candles:
+        date_ = datetime.fromtimestamp(candle[6]/1000.0)
+        open_ = candle[1]
+        close = candle[4]
+        high = candle[2]
+        low = candle[3]
+        date_data.append(date_)
+        open_data.append(open_)
+        close_data.append(close)
+        high_data.append(high)
+        low_data.append(low)
+    return {
+        'date_data': date_data,
+        'open_data': open_data,
+        'close_data': close_data,
+        'high_data': high_data,
+        'low_data': low_data
+    }
 
 
 class Chart:
@@ -86,13 +89,18 @@ class Chart:
         self._type = type_asset
         self._ticker = ticker_asset
         self._period = time_period
-        self._figi = get_figi_by_search(self._ticker, self._type)
-        self._data_candles = get_candles_stock_etf(self._figi, self._period)
-    
+        if self._type in ['share', 'etf']:
+            self._figi = get_figi_by_search(self._ticker, self._type)
+            self._data_candles = get_candles_stock_etf(self._figi, self._period)
+        elif self._type == 'crypto':
+            self._data_candles = get_candles_crypto(self._ticker, self._period)
 
     def _create_path_to_chart(self):
         date_today = date.today().strftime('%d-%m-%Y')
-        path = os.path.join('charts', date_today, self._period)
+        if self._type in ['share', 'etf']:
+            path = os.path.join('charts', date_today, 'shares_etf', self._period)
+        elif self._type == 'crypto':
+            path = os.path.join('charts', date_today, 'crypto', self._period)
         file_name = f'{self._ticker}.png'
         result_path = os.path.join(path, file_name)
         if os.path.isdir(path):
@@ -111,6 +119,11 @@ class Chart:
         return path
 
 
-# if __name__ == '__main__':
-#     graph = Graph('share', 'NVTK', '1y')
-#     print(graph.get_path_to_graph())
+if __name__ == '__main__':
+    chart = Chart('crypto', 'SOLUSDT', '1y')
+    chart.create_chart()
+    # data = get_candles_crypto('BTCUSDT', '3m')
+    # fig = go.Figure(data=[go.Candlestick(x=data['date_data'],
+    # open=data['open_data'], high=data['high_data'], 
+    # low=data['low_data'], close=data['close_data'])])
+    # fig.show()
