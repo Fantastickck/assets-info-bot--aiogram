@@ -1,0 +1,91 @@
+import requests
+import finplot
+
+from datetime import datetime
+import os
+import requests
+from decimal import Decimal
+
+
+from pandas import DataFrame
+
+from tinkoff.invest import Client
+from tinkoff.invest.schemas import InstrumentIdType, InstrumentStatus
+
+import pandas as pd
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+
+
+API_TOKEN = os.getenv('TINVEST_TOKEN')
+
+
+def main():
+    with Client(API_TOKEN) as client:
+        instruments = client.instruments
+        res = DataFrame(
+            instruments.shares(instrument_status=InstrumentStatus.INSTRUMENT_STATUS_ALL).instruments,
+            columns=['name', 'figi', 'ticker', 'class_code']
+        )
+        res = res[res['ticker'] == 'AAPL']
+    print(res.tail(10))
+
+
+def get_info_share(ticker, type_asset):
+    figi = get_figi_by_search(ticker, type_asset)
+    with Client(API_TOKEN) as client:
+        instruments = client.instruments
+        res = instruments.share_by(id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI, id=figi)
+        return {
+            'name': res.instrument.name,
+            'sector': res.instrument.sector,
+            'currency': res.instrument.currency,
+            'country_of_risk': res.instrument.country_of_risk,
+            'country_of_risk_name': res.instrument.country_of_risk_name
+        }
+
+
+# def get_figi_by_ticker(ticker):
+#     url = f'https://usdrur.ru/api/figi/{ticker}'
+#     res = requests.get(url).json()
+#     return res['resp']['figi']
+
+
+def get_figi_by_search(ticker, type_asset):
+    with Client(API_TOKEN) as client:
+        instruments = client.instruments
+        search = instruments.find_instrument(query=ticker).instruments
+        for instrument in reversed(search):
+            if instrument.ticker == ticker and instrument.instrument_type == type_asset:
+                return instrument.figi
+
+
+def get_info_etf(ticker, type_asset):
+    figi = get_figi_by_search(ticker, type_asset)
+    with Client(API_TOKEN) as client:
+        instruments = client.instruments
+        res = instruments.etf_by(id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI, id=figi)
+        return {
+            'name': res.instrument.name,
+            'focus_type': res.instrument.focus_type,
+            'currency': res.instrument.currency,
+            'country_of_risk': res.instrument.country_of_risk,
+            'country_of_risk_name': res.instrument.country_of_risk_name,
+        }
+
+
+
+def get_last_price(ticker, type_asset):
+    figi = get_figi_by_search(ticker, type_asset)
+    with Client(API_TOKEN) as client:
+        units = client.market_data.get_last_prices(figi=[figi]).last_prices[0].price.units
+        nano = client.market_data.get_last_prices(figi=[figi]).last_prices[0].price.nano
+        last_price = Decimal(str(units) + '.' + str(nano))
+        return last_price
+        
+
+if __name__ == '__main__':
+    print(get_info_etf('FXRB', 'etf'))
+
+
