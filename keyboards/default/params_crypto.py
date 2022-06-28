@@ -18,4 +18,3 @@ crypto_keyboard = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
-    

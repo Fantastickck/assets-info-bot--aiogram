@@ -15,7 +15,7 @@ from keyboards.inline.charts import charts_markup, chart_cb
 from keyboards.default.params_share import share_keyboard
 from keyboards.default.params_etf import etf_keyboard
 from keyboards.default.params_crypto import crypto_keyboard
-from keyboards.default.type_asset import type_asset_markup
+from keyboards.default.type_asset import type_asset_keyboard
 
 from messages.config import CMD_EMOJI, ASSET_EMOJI
 
@@ -31,7 +31,7 @@ TRANSLATE_PERIOD = {
 @dp.message_handler(filters.Text(equals=CMD_EMOJI.get('change_asset_type')))
 @dp.message_handler(commands='start')
 async def cmd_start(message: types.Message, state: FSMContext):
-    keyboard = type_asset_markup()
+    keyboard = type_asset_keyboard
     async with state.proxy() as data:
         data['type_asset'] = ''
         data['ticker_asset'] = ''

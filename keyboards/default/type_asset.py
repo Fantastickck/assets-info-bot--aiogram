@@ -1,10 +1,17 @@
-from aiogram import types
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 from messages.config import ASSET_EMOJI
 
 
-def type_asset_markup():
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.row(ASSET_EMOJI.get('share'), ASSET_EMOJI.get('etf'))
-    keyboard.add(ASSET_EMOJI.get('crypto'))
-    return keyboard
+type_asset_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(ASSET_EMOJI.get('share')),
+            KeyboardButton(ASSET_EMOJI.get('etf'))
+        ],
+        [
+            KeyboardButton(ASSET_EMOJI.get('crypto'))
+        ]
+    ],
+    resize_keyboard=True
+)

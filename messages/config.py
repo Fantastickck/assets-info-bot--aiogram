@@ -12,5 +12,5 @@ CMD_EMOJI = {
 ASSET_EMOJI = {
     'share': f'{emoji.emojize(":scroll:")} Акция',
     'etf': f'{emoji.emojize(":classical_building:")}  ETF',
-    'crypto': f'{emoji.emojize(":yellow_circle:")}  Криптовалюта',
+    'crypto': f'{emoji.emojize(":desktop_computer:")}  Криптовалюта',
 }

@@ -1,16 +1,14 @@
 from decimal import Decimal
 from datetime import datetime, date
-import os
-from typing import Dict, List
 from dateutil.relativedelta import relativedelta
+import os
 
+from binance.spot import Spot
 from tinkoff.invest import Client
-from binance.spot import Spot 
-from .market_data import API_TOKEN, get_figi_by_search
-
 from tinkoff.invest.schemas import CandleInterval
-
 import plotly.graph_objects as go
+
+from .market_data import API_TOKEN, get_figi_by_search
 
 
 PERIOD_DATE = {
@@ -26,8 +24,8 @@ def get_candles_stock_etf(figi, period):
     date_from = PERIOD_DATE.get(period)
     with Client(API_TOKEN) as client:
         candles = client.get_all_candles(figi=figi, from_=date_from,
-        to=date_to, interval=CandleInterval.CANDLE_INTERVAL_DAY)  
-                  
+            to=date_to, interval=CandleInterval.CANDLE_INTERVAL_DAY)
+
         date_data = []
         open_data = []
         close_data = []
@@ -58,11 +56,14 @@ def get_candles_crypto(ticker, period):
     date_from = int(PERIOD_DATE.get(period).timestamp()*1000)
     spot_client = Spot(base_url="https://api.binance.com")
     if period == '1m':
-        candles = spot_client.klines(ticker, '6h', startTime=date_from, endTime=date_to)
+        candles = spot_client.klines(
+            ticker, '6h', startTime=date_from, endTime=date_to)
     elif period == '1y':
-        candles = spot_client.klines(ticker, '3d', startTime=date_from, endTime=date_to)
+        candles = spot_client.klines(
+            ticker, '3d', startTime=date_from, endTime=date_to)
     else:
-        candles = spot_client.klines(ticker, '1d', startTime=date_from, endTime=date_to)
+        candles = spot_client.klines(
+            ticker, '1d', startTime=date_from, endTime=date_to)
     date_data = []
     open_data = []
     close_data = []
@@ -89,21 +90,23 @@ def get_candles_crypto(ticker, period):
 
 
 class Chart:
-    
+
     def __init__(self, type_asset, ticker_asset, time_period):
         self._type = type_asset
         self._ticker = ticker_asset
         self._period = time_period
         if self._type in ['share', 'etf']:
             self._figi = get_figi_by_search(self._ticker, self._type)
-            self._data_candles = get_candles_stock_etf(self._figi, self._period)
+            self._data_candles = get_candles_stock_etf(
+                self._figi, self._period)
         elif self._type == 'crypto':
             self._data_candles = get_candles_crypto(self._ticker, self._period)
 
     def _create_path_to_chart(self):
         date_today = date.today().strftime('%d-%m-%Y')
         if self._type in ['share', 'etf']:
-            path = os.path.join('charts', date_today, 'shares_etf', self._period)
+            path = os.path.join('charts', date_today,
+                                'shares_etf', self._period)
         elif self._type == 'crypto':
             path = os.path.join('charts', date_today, 'crypto', self._period)
         file_name = f'{self._ticker}.png'
@@ -114,21 +117,10 @@ class Chart:
             os.makedirs(path)
         return result_path
 
-
     def create_chart(self):
         fig = go.Figure(data=[go.Candlestick(x=self._data_candles['date_data'],
-        open=self._data_candles['open_data'], high=self._data_candles['high_data'], 
-        low=self._data_candles['low_data'], close=self._data_candles['close_data'])])
+                                             open=self._data_candles['open_data'], high=self._data_candles['high_data'],
+                                             low=self._data_candles['low_data'], close=self._data_candles['close_data'])])
         path = self._create_path_to_chart()
         fig.write_image(path, width=1000)
         return path
-
-
-if __name__ == '__main__':
-    chart = Chart('crypto', 'SOLUSDT', '1y')
-    chart.create_chart()
-    # data = get_candles_crypto('BTCUSDT', '3m')
-    # fig = go.Figure(data=[go.Candlestick(x=data['date_data'],
-    # open=data['open_data'], high=data['high_data'], 
-    # low=data['low_data'], close=data['close_data'])])
-    # fig.show()

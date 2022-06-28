@@ -1,23 +1,18 @@
 from decimal import Decimal
 from datetime import datetime
-import os
-
-from tinkoff.invest import Client
-from market_data import API_TOKEN, get_figi_by_search
-
-from tinkoff.invest.schemas import CandleInterval
 
 import plotly.graph_objects as go
-from datetime import datetime
-
+from tinkoff.invest import Client
+from tinkoff.invest.schemas import CandleInterval
 from binance.spot import Spot 
 
+from market_data import API_TOKEN, get_figi_by_search
 
 
 def get_candles(figi):
     with Client(API_TOKEN) as client:
         candles = client.get_all_candles(figi=figi, from_=datetime(day=24, month=1, year=2022), 
-        to=datetime(day=24, month=6, year=2022), interval=CandleInterval.CANDLE_INTERVAL_DAY)
+            to=datetime(day=24, month=6, year=2022), interval=CandleInterval.CANDLE_INTERVAL_DAY)
         date_data = []
         open_data = []
         close_data = []
@@ -77,14 +72,3 @@ def get_candles_crypto(ticker, period):
         'high_data': high_data,
         'low_data': low_data
     }
-
-
-
-
-if __name__ == '__main__':
-    # data = get_candles_crypto('BTCUSDT')
-    # fig = go.Figure(data=[go.Candlestick(x=data['date_data'],
-    # open=data['open_data'], high=data['high_data'], 
-    # low=data['low_data'], close=data['close_data'])])
-    # fig.show()
-    print(datetime.today().timestamp() * 1000)
