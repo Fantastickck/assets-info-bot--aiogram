@@ -14,22 +14,3 @@ ASSET_EMOJI = {
     'etf': f'{emoji.emojize(":classical_building:")}  ETF',
     'crypto': f'{emoji.emojize(":yellow_circle:")}  Криптовалюта',
 }
-
-# :antenna_bars:
-# :bar_chart:
-# :clockwise_vertical_arrows:
-# :memo:
-# :newspaper:
-# :warning:
-# :red_exclamation_mark:
-# :open_book:
-
-# :cross_mark:
-# :dollar_banknote:
-# :money_bag:
-
-# :globe_with_meridians:
-# :globe_showing_Europe-Africa:
-# :globe_showing_Asia-Australia:
-# :globe_showing_Americas:
-# :heavy_dollar_sign:

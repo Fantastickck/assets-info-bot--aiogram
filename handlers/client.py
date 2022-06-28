@@ -3,7 +3,7 @@ from decimal import Decimal
 
 import aiogram.utils.markdown as fmt
 from aiogram import types
-from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher import FSMContext, filters
 
 from loader import dp, bot
 
@@ -28,7 +28,7 @@ TRANSLATE_PERIOD = {
 }
 
 
-@dp.message_handler(lambda message: message.text == CMD_EMOJI.get('change_asset_type'))
+@dp.message_handler(filters.Text(equals=CMD_EMOJI.get('change_asset_type')))
 @dp.message_handler(commands='start')
 async def cmd_start(message: types.Message, state: FSMContext):
     keyboard = type_asset_markup()
@@ -40,7 +40,7 @@ async def cmd_start(message: types.Message, state: FSMContext):
     await message.answer('Выбери тип инструмента', reply_markup=keyboard)
 
 
-@dp.message_handler(lambda message: message.text == CMD_EMOJI.get('charts'))
+@dp.message_handler(filters.Text(equals=CMD_EMOJI.get('charts')))
 async def chart_test(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         type_asset = data['type_asset']
@@ -75,7 +75,7 @@ async def create_graph(query: types.CallbackQuery, callback_data: dict):
     await bot.delete_message(chat_id=query.message.chat.id, message_id=message_loading.message_id)
 
 
-@dp.message_handler(lambda message: message.text == ASSET_EMOJI.get('share'))
+@dp.message_handler(filters.Text(equals=ASSET_EMOJI.get('share')))
 async def cmd_share(message: types.Message, state: FSMContext):
     type_asset = 'share'
     async with state.proxy() as data:
@@ -83,7 +83,7 @@ async def cmd_share(message: types.Message, state: FSMContext):
     await message.answer('Введите тикер акции, уникальное короткое название инструмента (длина: 1-6 символов).')
 
 
-@dp.message_handler(lambda message: message.text == ASSET_EMOJI.get('etf'))
+@dp.message_handler(filters.Text(equals=ASSET_EMOJI.get('etf')))
 async def cmd_fund(message: types.Message, state: FSMContext):
     type_asset = 'etf'
     async with state.proxy() as data:
@@ -91,7 +91,7 @@ async def cmd_fund(message: types.Message, state: FSMContext):
     await message.answer('Введите тикер фонда, уникальное короткое название инструмента (длина: 1-6 символов).')
 
 
-@dp.message_handler(lambda message: message.text == ASSET_EMOJI.get('crypto'))
+@dp.message_handler(filters.Text(equals=ASSET_EMOJI.get('crypto')))
 async def cmd_crypto(message: types.Message, state: FSMContext):
     type_asset = 'crypto'
     async with state.proxy() as data:
@@ -99,7 +99,7 @@ async def cmd_crypto(message: types.Message, state: FSMContext):
     await message.answer('Введите тикер отношения, например: "BTCUSDT"')
 
 
-@dp.message_handler(lambda message: message.text == CMD_EMOJI.get('last_price'))
+@dp.message_handler(filters.Text(equals=CMD_EMOJI.get('last_price')))
 async def get_share_last_price(message: types.Message, state: FSMContext):
 
     async with state.proxy() as data:
@@ -130,7 +130,7 @@ async def get_share_last_price(message: types.Message, state: FSMContext):
         await message.answer('Вы не вводили тикер интструмента')
 
 
-@dp.message_handler(lambda message: message.text == CMD_EMOJI.get('fundamentals'))
+@dp.message_handler(filters.Text(equals=CMD_EMOJI.get('fundamentals')))
 async def get_share_fund_info(message: types.Message, state: FSMContext):
     keyboard = share_keyboard
     async with state.proxy() as data:
@@ -150,7 +150,7 @@ async def get_fund_structure(message: types.Message):
 
 
 @dp.message_handler()
-@dp.message_handler(lambda message: message.text == CMD_EMOJI.get('general_info'))
+@dp.message_handler(filters.Text(equals=CMD_EMOJI.get('general_info')))
 async def cmd_info_stock(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         type_asset = data['type_asset']

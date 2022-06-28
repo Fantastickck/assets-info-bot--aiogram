@@ -59,6 +59,8 @@ def get_candles_crypto(ticker, period):
     spot_client = Spot(base_url="https://api.binance.com")
     if period == '1m':
         candles = spot_client.klines(ticker, '6h', startTime=date_from, endTime=date_to)
+    elif period == '1y':
+        candles = spot_client.klines(ticker, '3d', startTime=date_from, endTime=date_to)
     else:
         candles = spot_client.klines(ticker, '1d', startTime=date_from, endTime=date_to)
     date_data = []

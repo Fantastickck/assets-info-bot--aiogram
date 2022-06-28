@@ -6,7 +6,6 @@ import os
 import requests
 from decimal import Decimal
 
-
 from pandas import DataFrame
 
 from tinkoff.invest import Client
@@ -76,5 +75,3 @@ def get_last_price(ticker, type_asset):
 
 if __name__ == '__main__':
     print(get_info_etf('FXRB', 'etf'))
-
-
