@@ -12,9 +12,9 @@ from utils.market_data_crypto import get_last_price_crypto
 from utils.charts_data import Chart
 
 from keyboards.inline.charts import charts_markup, chart_cb
-from keyboards.default.params_share import share_markup
-from keyboards.default.params_etf import etf_markup
-from keyboards.default.params_crypto import crypto_markup
+from keyboards.default.params_share import share_keyboard
+from keyboards.default.params_etf import etf_keyboard
+from keyboards.default.params_crypto import crypto_keyboard
 from keyboards.default.type_asset import type_asset_markup
 
 from messages.config import CMD_EMOJI, ASSET_EMOJI
@@ -108,15 +108,15 @@ async def get_share_last_price(message: types.Message, state: FSMContext):
 
     if type_asset != '' and ticker_asset != '':
         if type_asset == 'share':
-            keyboard = share_markup()
+            keyboard = share_keyboard
             last_price = get_last_price(ticker_asset, type_asset)
             last_price = last_price.quantize(Decimal('1.00'))
         elif type_asset == 'etf':
-            keyboard = etf_markup()
+            keyboard = etf_keyboard
             last_price = get_last_price(ticker_asset, type_asset)
             last_price = last_price.quantize(Decimal('1.0000'))
         elif type_asset == 'crypto':
-            keyboard = crypto_markup()
+            keyboard = crypto_keyboard
             last_price = get_last_price_crypto(ticker_asset)
             last_price = last_price.quantize(Decimal('1.0000'))
         await message.answer(
@@ -130,9 +130,9 @@ async def get_share_last_price(message: types.Message, state: FSMContext):
         await message.answer('Вы не вводили тикер интструмента')
 
 
-@dp.message_handler(lambda message: message.text == ASSET_EMOJI.get('fundamentals'))
+@dp.message_handler(lambda message: message.text == CMD_EMOJI.get('fundamentals'))
 async def get_share_fund_info(message: types.Message, state: FSMContext):
-    keyboard = share_markup()
+    keyboard = share_keyboard
     async with state.proxy() as data:
         if data['type_asset'] == 'share' and data['ticker_asset'] != '':
             ticker = data['ticker_asset']
@@ -145,7 +145,7 @@ async def get_share_fund_info(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text == 'Состав фонда')
 async def get_fund_structure(message: types.Message):
-    keyboard = etf_markup()
+    keyboard = etf_keyboard
     await message.answer('Функционал еще не готов', reply_markup=keyboard)
 
 
@@ -160,7 +160,7 @@ async def cmd_info_stock(message: types.Message, state: FSMContext):
             else:
                 ticker = message.text.upper()
             if re.match(r'(?=^.{1,6}$)[a-zA-Z]', ticker):
-                keyboard = share_markup()
+                keyboard = share_keyboard
                 data['ticker_asset'] = ticker
                 try:
                     share_info = get_info_share(ticker, type_asset)
@@ -190,7 +190,7 @@ async def cmd_info_stock(message: types.Message, state: FSMContext):
             else:
                 ticker = message.text.upper()
             if re.match(r'(?=^.{1,6}$)[a-zA-Z]', ticker):
-                keyboard = etf_markup()
+                keyboard = etf_keyboard
                 data['ticker_asset'] = ticker
                 try:
                     etf_info = get_info_etf(ticker, type_asset)
@@ -216,7 +216,7 @@ async def cmd_info_stock(message: types.Message, state: FSMContext):
                 await message.answer('Упс, неправильный формат тикера(. Попробуй еще раз')
             
         elif type_asset == 'crypto':
-            keyboard = crypto_markup()
+            keyboard = crypto_keyboard
             if message.text == CMD_EMOJI.get('general_info'):
                 ticker = data['ticker_asset']
             else:

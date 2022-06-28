@@ -26,8 +26,8 @@ def get_candles_stock_etf(figi, period):
     date_from = PERIOD_DATE.get(period)
     with Client(API_TOKEN) as client:
         candles = client.get_all_candles(figi=figi, from_=date_from,
-        to=date_to, interval=CandleInterval.CANDLE_INTERVAL_DAY)
-
+        to=date_to, interval=CandleInterval.CANDLE_INTERVAL_DAY)  
+                  
         date_data = []
         open_data = []
         close_data = []
@@ -57,7 +57,10 @@ def get_candles_crypto(ticker, period):
     date_to = int(datetime.today().timestamp() * 1000)
     date_from = int(PERIOD_DATE.get(period).timestamp()*1000)
     spot_client = Spot(base_url="https://api.binance.com")
-    candles = spot_client.klines(ticker, '1d', startTime=date_from, endTime=date_to)
+    if period == '1m':
+        candles = spot_client.klines(ticker, '6h', startTime=date_from, endTime=date_to)
+    else:
+        candles = spot_client.klines(ticker, '1d', startTime=date_from, endTime=date_to)
     date_data = []
     open_data = []
     close_data = []

@@ -21,17 +21,6 @@ pd.set_option('display.width', 1000)
 API_TOKEN = os.getenv('TINVEST_TOKEN')
 
 
-def main():
-    with Client(API_TOKEN) as client:
-        instruments = client.instruments
-        res = DataFrame(
-            instruments.shares(instrument_status=InstrumentStatus.INSTRUMENT_STATUS_ALL).instruments,
-            columns=['name', 'figi', 'ticker', 'class_code']
-        )
-        res = res[res['ticker'] == 'AAPL']
-    print(res.tail(10))
-
-
 def get_info_share(ticker, type_asset):
     figi = get_figi_by_search(ticker, type_asset)
     with Client(API_TOKEN) as client:
