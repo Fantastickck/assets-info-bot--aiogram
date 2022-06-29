@@ -2,10 +2,22 @@ import os
 from decimal import Decimal
 
 from tinkoff.invest import Client
-from tinkoff.invest.schemas import InstrumentIdType, InstrumentStatus
+from tinkoff.invest.schemas import InstrumentIdType
 
 
 API_TOKEN = os.getenv('TINVEST_TOKEN')
+
+
+def get_figi_by_search(ticker, type_asset):
+    """
+    Get figi of the asset by tikcer. Using tinkoff api method FindInstrument
+    """
+    with Client(API_TOKEN) as client:
+        instruments = client.instruments
+        search = instruments.find_instrument(query=ticker).instruments
+        for instrument in reversed(search):
+            if instrument.ticker == ticker and instrument.instrument_type == type_asset:
+                return instrument.figi
 
 
 def get_info_share(ticker, type_asset):
@@ -21,15 +33,6 @@ def get_info_share(ticker, type_asset):
             'country_of_risk': res.instrument.country_of_risk,
             'country_of_risk_name': res.instrument.country_of_risk_name
         }
-
-
-def get_figi_by_search(ticker, type_asset):
-    with Client(API_TOKEN) as client:
-        instruments = client.instruments
-        search = instruments.find_instrument(query=ticker).instruments
-        for instrument in reversed(search):
-            if instrument.ticker == ticker and instrument.instrument_type == type_asset:
-                return instrument.figi
 
 
 def get_info_etf(ticker, type_asset):

@@ -7,9 +7,9 @@ from aiogram.dispatcher import FSMContext, filters
 
 from loader import dp, bot
 
-from utils.market_data import get_info_share, get_info_etf, get_last_price
-from utils.market_data_crypto import get_last_price_crypto
-from utils.charts_data import Chart
+from utils.market_data.share_etf.market_data import get_info_share, get_info_etf, get_last_price
+from utils.market_data.crypto.market_data import get_last_price_crypto
+from utils.market_data.generic.chart import Chart
 
 from keyboards.inline.charts import charts_markup, chart_cb
 from keyboards.default.params_share import share_keyboard
