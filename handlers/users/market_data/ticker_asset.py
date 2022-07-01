@@ -48,7 +48,6 @@ async def choice_ticker_asset(message: types.Message, state: FSMContext):
                         f'Сектор эк-ки: {fmt.hbold(sector)}\n' +
                         f'Страна: {country_of_risk_name} ({fmt.hbold(country_of_risk)})',
                     ),
-                        parse_mode='HTML',
                         reply_markup=keyboard
                     )
             else:
@@ -78,7 +77,6 @@ async def choice_ticker_asset(message: types.Message, state: FSMContext):
                         f'Фокусный актив: {fmt.hbold(focus_type.upper())}\n' +
                         f'Страна: {country_of_risk_name} ({fmt.hbold(country_of_risk)})',
                     ),
-                        parse_mode='HTML',
                         reply_markup=keyboard
                     )
             else:

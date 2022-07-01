@@ -4,15 +4,13 @@ from decimal import Decimal
 from tinkoff.invest import Client
 from tinkoff.invest.schemas import InstrumentIdType
 
-
-API_TOKEN = os.getenv('TINVEST_TOKEN')
-
+from config import TINVEST_API_TOKEN
 
 def get_figi_by_search(ticker, type_asset):
     """
     Get figi of the asset by tikcer. Using tinkoff api method FindInstrument
     """
-    with Client(API_TOKEN) as client:
+    with Client(TINVEST_API_TOKEN) as client:
         instruments = client.instruments
         search = instruments.find_instrument(query=ticker).instruments
         for instrument in reversed(search):
@@ -22,7 +20,7 @@ def get_figi_by_search(ticker, type_asset):
 
 def get_info_share(ticker, type_asset):
     figi = get_figi_by_search(ticker, type_asset)
-    with Client(API_TOKEN) as client:
+    with Client(TINVEST_API_TOKEN) as client:
         instruments = client.instruments
         res = instruments.share_by(
             id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI, id=figi)
@@ -37,7 +35,7 @@ def get_info_share(ticker, type_asset):
 
 def get_info_etf(ticker, type_asset):
     figi = get_figi_by_search(ticker, type_asset)
-    with Client(API_TOKEN) as client:
+    with Client(TINVEST_API_TOKEN) as client:
         instruments = client.instruments
         res = instruments.etf_by(
             id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI, id=figi)
@@ -52,7 +50,7 @@ def get_info_etf(ticker, type_asset):
 
 def get_last_price(ticker, type_asset):
     figi = get_figi_by_search(ticker, type_asset)
-    with Client(API_TOKEN) as client:
+    with Client(TINVEST_API_TOKEN) as client:
         units = client.market_data.get_last_prices(
             figi=[figi]).last_prices[0].price.units
         nano = client.market_data.get_last_prices(

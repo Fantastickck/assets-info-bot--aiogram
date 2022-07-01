@@ -1,3 +1,4 @@
+import aiogram.utils.markdown as fmt
 from aiogram import types
 from aiogram.dispatcher import FSMContext, filters
 
@@ -44,7 +45,7 @@ async def create_graph(query: types.CallbackQuery, callback_data: dict):
     keyboard = charts_markup(type_asset, ticker_asset)
 
     await bot.send_photo(chat_id=query.message.chat.id,
-        caption=f'График за {TRANSLATE_PERIOD.get(period)} для {ticker_asset}', 
+        caption=f'График за {fmt.hbold(TRANSLATE_PERIOD.get(period))} для {fmt.hbold(ticker_asset)}', 
         photo=types.InputFile(path_to_chart), 
         reply_markup=keyboard
     )

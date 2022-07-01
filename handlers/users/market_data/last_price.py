@@ -39,8 +39,7 @@ async def get_share_last_price(message: types.Message, state: FSMContext):
             last_price = last_price.quantize(Decimal('1.0000'))
         await message.answer(
             fmt.text(
-                f'Последняя цена {fmt.hbold(ticker_asset.upper())}:  {fmt.hbold(last_price)}'),
-            parse_mode='HTML', reply_markup=keyboard
+                f'Последняя цена {fmt.hbold(ticker_asset.upper())}:  {fmt.hbold(last_price)}'), reply_markup=keyboard
         )
     elif data['type_asset'] == '':
         await message.answer('Вы не выбрали тип актива')

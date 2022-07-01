@@ -5,8 +5,7 @@ from dateutil.relativedelta import relativedelta
 from tinkoff.invest import Client
 from tinkoff.invest.schemas import CandleInterval
 
-from .market_data import API_TOKEN
-
+from config import TINVEST_API_TOKEN
 
 PERIOD_DATE = {
     '1m': datetime.today() - relativedelta(months=1),
@@ -22,7 +21,7 @@ def get_candles_stock_etf(figi, period):
     """
     date_to = datetime.today()
     date_from = PERIOD_DATE.get(period)
-    with Client(API_TOKEN) as client:
+    with Client(TINVEST_API_TOKEN) as client:
         candles = client.get_all_candles(figi=figi, from_=date_from,
             to=date_to, interval=CandleInterval.CANDLE_INTERVAL_DAY)
 
