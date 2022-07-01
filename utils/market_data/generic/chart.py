@@ -41,8 +41,8 @@ class Chart:
 
     def create_chart(self):
         fig = go.Figure(data=[go.Candlestick(x=self._data_candles['date_data'],
-                                             open=self._data_candles['open_data'], high=self._data_candles['high_data'],
-                                             low=self._data_candles['low_data'], close=self._data_candles['close_data'])])
+            open=self._data_candles['open_data'], high=self._data_candles['high_data'],
+                low=self._data_candles['low_data'], close=self._data_candles['close_data'])])
         path = self._create_path_to_chart()
         fig.write_image(path, width=1000)
         return path
